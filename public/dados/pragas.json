@@ -62,6 +62,52 @@
       ]
     },
     {
+      "id": "broca_ramos",
+      "nome": "Broca-dos-ramos",
+      "nome_cientifico": "Xylosandrus compactus",
+      "tipo": "Praga (inseto)",
+      "onde": "Ramos verdes e ponteiros",
+      "sintomas": [
+        "Furinho redondo e bem pequeno, geralmente na parte de baixo do ramo verde",
+        "Folhas da ponta do ramo murcham, ficam marrons e o ramo seca do furo para a ponta",
+        "Ao abrir o ramo: um túnel escuro por dentro, com ovos e larvinhas brancas e um mofo branco nas paredes",
+        "Besourinho preto bem pequeno dentro do túnel (não confunda com a broca do fruto: esta ataca o ramo)"
+      ],
+      "como_avaliar": "Ande pelo talhão e conte quantos pés têm ramos secando com furinho. Se aparecer em vários pés, ou em reboleira, procure o técnico.",
+      "por_que_acontece": "O besourinho ataca mais a planta fraca: com falta de água, mal adubada ou depois de poda e geada. Ele cava o ramo e planta um fungo lá dentro, que serve de comida para as larvas. Os restos de ramos atacados deixados na lavoura são de onde saem os novos besouros.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Cortar e queimar os ramos atacados",
+          "como_fazer": "Corte o ramo uns 10 cm abaixo do furo, já na parte verde e sadia. Junte os pedaços num saco e queime ou enterre fundo, longe da lavoura. Não deixe os ramos cortados no chão: os besouros saem deles e voltam a atacar.",
+          "quando": "Assim que ver ramos secando com furinho"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Limpar os restos de poda",
+          "como_fazer": "Depois da poda ou da desbrota, retire da lavoura os ramos e galhos cortados, ou triture bem. Restos de madeira servem de criadouro para a broca-dos-ramos.",
+          "quando": "Depois de cada poda"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Planta forte: água e adubo em dia",
+          "como_fazer": "Mantenha a irrigação regular no tempo seco e faça a adubação conforme a análise de solo. A planta bem tratada resiste mais e se recupera do ataque.",
+          "quando": "O ano todo, com mais cuidado no período seco"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Controle químico só com orientação técnica",
+          "como_fazer": "Ainda há poucos produtos registrados para essa praga no café. Não use inseticida por conta própria: leve um ramo atacado ao Incaper para confirmar e peça a receita, se for o caso. Use só produto registrado, respeitando dose, carência e EPI.",
+          "quando": "Só com ataque forte e confirmado pelo técnico",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
       "id": "bicho_mineiro",
       "nome": "Bicho-mineiro",
       "nome_cientifico": "Leucoptera coffeella",
