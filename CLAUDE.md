@@ -7,7 +7,9 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
 ## Quando o Bruno mandar uma foto para análise
 
 1. **Leia o código** carimbado na faixa verde embaixo da foto (`CÓDIGO: XXXXXX`, 6 caracteres, sem O/0/I/1).
-   A faixa também traz parte da planta, talhão e data. Se o Bruno colar a mensagem do WhatsApp,
+   A faixa também traz parte da planta, talhão e data. Um pedido pode ter **até 4 fotos** com o mesmo código
+   (`FOTO 1 DE 3`...): analise todas juntas e faça **um laudo só** para o código. Se faltar alguma foto
+   do pedido, avise o Bruno. Se o Bruno colar a mensagem do WhatsApp,
    ela tem o código e a observação do produtor. Sem código legível: pergunte ao Bruno, não invente.
 2. **Analise a foto** comparando com o catálogo em `public/dados/pragas.json`. Escolha `diagnostico_id`
    entre os ids do catálogo, `saudavel` ou `nao_identificado`.
@@ -52,4 +54,4 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
 5. Diga ao Bruno, em poucas linhas: o diagnóstico, a certeza, e o caminho do arquivo para ele mandar ao produtor.
    Se a certeza for baixa ou houver risco de prejuízo, recomende a visita de um técnico (Incaper, gratuito).
 
-Guarde as fotos recebidas em `fotos-recebidas/` (fora do git) com o nome `CODIGO.jpg`, se o Bruno enviar o arquivo.
+Guarde as fotos recebidas em `fotos-recebidas/` (fora do git) com o nome `CODIGO.jpg` (ou `CODIGO-1.jpg`, `CODIGO-2.jpg`... quando o pedido tiver várias fotos).

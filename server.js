@@ -39,9 +39,10 @@ Regras:
 
 const cliente = MODO_MANUAL ? null : new Anthropic();
 
-async function diagnosticar({ imagem, parte, observacao }) {
+async function diagnosticar({ imagens, parte, observacao }) {
   const texto = [
     `Parte da planta fotografada: ${parte || "não informada"}.`,
+    imagens.length > 1 ? `São ${imagens.length} fotos do mesmo problema, de ângulos diferentes. Considere todas juntas.` : "",
     observacao ? `O produtor escreveu: "${observacao.slice(0, 500)}"` : "",
   ].filter(Boolean).join("\n");
 
@@ -55,7 +56,7 @@ async function diagnosticar({ imagem, parte, observacao }) {
     messages: [{
       role: "user",
       content: [
-        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: imagem } },
+        ...imagens.map((data) => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data } })),
         { type: "text", text: texto },
       ],
     }],
@@ -124,13 +125,15 @@ const servidor = http.createServer(async (req, res) => {
     }
     if (req.method === "POST" && req.url === "/api/diagnosticar") {
       if (MODO_MANUAL) return json(res, 503, { erro: "Análise automática desligada. Use Enviar para análise." });
-      const corpo = await lerCorpo(req, 8 * 1024 * 1024);
+      const corpo = await lerCorpo(req, 24 * 1024 * 1024);
       if (CODIGO_ACESSO && corpo.codigo !== CODIGO_ACESSO) {
         return json(res, 401, { erro: "Código de acesso inválido." });
       }
       const ip = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.socket.remoteAddress;
       if (!dentroDoLimite(ip)) return json(res, 429, { erro: "Muitas análises em pouco tempo. Tente de novo mais tarde." });
-      if (typeof corpo.imagem !== "string" || corpo.imagem.length < 100) throw new ErroUsuario("Foto não recebida.");
+      const imagens = Array.isArray(corpo.imagens) ? corpo.imagens.filter((i) => typeof i === "string" && i.length > 100).slice(0, 4) : [];
+      if (!imagens.length) throw new ErroUsuario("Foto não recebida.");
+      corpo.imagens = imagens;
       return json(res, 200, await diagnosticar(corpo));
     }
     if (req.method === "GET") return servirArquivo(req, res);
