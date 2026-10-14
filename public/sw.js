@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir sem internet.
 // Rede primeiro (para receber atualizações); sem rede, usa a cópia guardada.
-const CACHE = "conilon-vivo-v6";
+const CACHE = "conilon-vivo-v7";
 const ARQUIVOS = ["./", "index.html", "app.js", "estilo.css", "icone.svg", "icone-192.png", "manifest.webmanifest", "dados/pragas.json"];
 
 self.addEventListener("install", (e) => {

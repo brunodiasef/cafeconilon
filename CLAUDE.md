@@ -54,4 +54,26 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
 5. Diga ao Bruno, em poucas linhas: o diagnóstico, a certeza, e o caminho do arquivo para ele mandar ao produtor.
    Se a certeza for baixa ou houver risco de prejuízo, recomende a visita de um técnico (Incaper, gratuito).
 
+6. **Atualize o cadastro** (`produtores/cadastro.json`, fora do git): veja abaixo.
+
+## Cadastro dos produtores e acompanhamento dos casos
+
+Cada pedido é um **caso** (o código) ligado a um **produtor**. O caso passa pelas etapas
+foto → laudo → achou na lavoura → tratou → resolvido. O Bruno quer ver isso por agricultor.
+
+- **Ao receber um pedido**: a mensagem traz `Produtor: Nome — Comunidade, Município` e `Telefone:`
+  (a faixa da foto também traz o nome). Se o produtor não existe em `produtores`, cadastre
+  (`id` = nome em minúsculas com hífen, ex.: `jose-silva`; `desde` = data de hoje, `AAAA-MM-DD`).
+  Crie o caso com `codigo`, `produtor`, `data_foto`, `parte`, `talhao` e `obs_produtor` (observação da mensagem).
+  Pedido sem nome do produtor (app antigo): pergunte ao Bruno de quem é. Até lá, use `"produtor": "sem_cadastro"`.
+- **Depois do laudo**: `node cadastro.js sincronizar` (copia diagnóstico, certeza e data do laudo para o caso).
+- **Quando o Bruno colar um "Conilon Vivo — retorno"**: atualize o caso pelo código.
+  `Achou na lavoura`: Sim, achei → `reconheceu: "sim"`; Não achei → `"nao"`; Ainda não olhei → `"nao_olhou"`.
+  `Tratamento`: títulos em `tratamentos` (o "Outro: ..." também entra na lista, como escrito); "Ainda não fiz" → `nao_tratou: true`.
+  `Resultado`: Resolveu → `resolveu: "sim"`; Melhorou um pouco → `"em_parte"`; Não resolveu → `"nao"`; Ainda não sei → `"esperando"`.
+  Preencha `data_retorno` e `obs_retorno`, e acrescente em `eventos` uma linha curta (`{ "data", "o_que" }`).
+  Se não resolveu ou o produtor não achou o problema, diga ao Bruno e recomende o Incaper.
+- **Sempre no fim**: `node cadastro.js validar` e `node cadastro.js painel`, e mande `produtores/painel.html` ao Bruno.
+  O painel tem dados pessoais: mande como arquivo, **nunca publique** como página ou no git.
+
 Guarde as fotos recebidas em `fotos-recebidas/` (fora do git) com o nome `CODIGO.jpg` (ou `CODIGO-1.jpg`, `CODIGO-2.jpg`... quando o pedido tiver várias fotos).

@@ -9,6 +9,13 @@ App web para o pequeno produtor de café conilon do Espírito Santo:
 2. O Bruno passa a foto ao Claude Code nesta pasta. O Claude gera `laudos/laudo-K7M2PX.json` (roteiro em `CLAUDE.md`) e confere com `node validar-laudo.js`.
 3. O Bruno manda o arquivo de volta. O produtor toca **Importar análise** e o resultado fica salvo no histórico, na foto certa.
 
+### Cadastro e acompanhamento
+
+- No app, o produtor preenche **seus dados** (nome, comunidade, município, telefone) na primeira vez que envia uma foto. Eles vão junto com cada pedido.
+- Depois do laudo, o produtor responde **"Como foi na lavoura?"**: se achou o problema, o que fez e se resolveu. Toca em **Enviar retorno** e a resposta vai pelo WhatsApp.
+- O Bruno passa pedidos e retornos ao Claude, que mantém `produtores/cadastro.json` e gera o **painel** `produtores/painel.html`: cada agricultor, cada caso e o que precisa de atenção (sem retorno, não resolveu, não achou o problema).
+- `node cadastro.js validar | sincronizar | painel`. A pasta `produtores/` fica **fora do git** (dados pessoais).
+
 Quando houver chave da API (`.env`), o app passa sozinho para o **modo automático** (análise na hora).
 
 ## Como funciona

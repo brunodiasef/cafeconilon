@@ -8,6 +8,9 @@ const tela = document.getElementById("tela");
 const PARTES = ["Folha", "Fruto", "Ramo", "Raiz", "Planta inteira"];
 const CONFIANCA = { alta: "Certeza alta", media: "Certeza média", baixa: "Certeza baixa" };
 const GRAVIDADE = { leve: "Ataque leve", moderada: "Ataque moderado", grave: "Ataque forte" };
+// Acompanhamento de cada caso: o produtor conta se achou o problema, o que fez e se resolveu.
+const RECONHECEU = { sim: "Sim, achei", nao: "Não achei", nao_olhou: "Ainda não olhei" };
+const RESOLVEU = { sim: "Resolveu", em_parte: "Melhorou um pouco", nao: "Não resolveu", esperando: "Ainda não sei" };
 
 let base = null;
 let status = { modo: "manual", precisa_codigo: false };
@@ -19,6 +22,11 @@ const problema = (id) => base.problemas.find((p) => p.id === id);
 const dataBR = (iso) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const lerLocal = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const gravarLocal = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+// Dados do produtor (ficam só neste celular e vão junto com cada pedido).
+const produtor = () => { try { return JSON.parse(lerLocal("produtor")) || null; } catch { return null; } };
+const nomeProdutor = (p) => p ? [p.nome, [p.comunidade, p.municipio].filter(Boolean).join(", ")].filter(Boolean).join(" — ") : "";
+let voltarDoCadastro = null; // tela para onde voltar depois de salvar o cadastro
 
 // ---------- banco local (IndexedDB) ----------
 const bancoPromessa = new Promise((ok, falha) => {
@@ -123,7 +131,7 @@ async function carimbar(registro, indice) {
   const numero = fotos.length > 1 ? `  ·  FOTO ${indice + 1} DE ${fotos.length}` : "";
   g.fillText(`CÓDIGO: ${registro.id}${numero}`, tamanho, img.height + tamanho * 1.7, c.width - tamanho * 2);
   g.font = `${tamanho}px sans-serif`;
-  const linha = [registro.parte, registro.talhao, dataBR(registro.data)].filter(Boolean).join(" · ");
+  const linha = [registro.produtor?.nome, registro.parte, registro.talhao, dataBR(registro.data)].filter(Boolean).join(" · ");
   g.fillText(linha, tamanho, img.height + tamanho * 3.2, c.width - tamanho * 2);
   return new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.85));
 }
@@ -138,6 +146,8 @@ async function enviarParaAnalise(registro) {
   const texto = [
     "Conilon Vivo — pedido de análise",
     `Código: ${registro.id}${total > 1 ? ` (${total} fotos)` : ""}`,
+    registro.produtor && `Produtor: ${nomeProdutor(registro.produtor)}`,
+    registro.produtor?.telefone && `Telefone: ${registro.produtor.telefone}`,
     `Parte: ${registro.parte}`,
     registro.talhao && `Talhão: ${registro.talhao}`,
     registro.obs && `Observação: ${registro.obs}`,
@@ -156,6 +166,32 @@ async function enviarParaAnalise(registro) {
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 5000);
   }
+}
+
+// Manda pelo WhatsApp como foi o caso, para quem acompanha os produtores manter o cadastro em dia.
+async function enviarRetorno(registro) {
+  const a = registro.acompanhamento || {};
+  const p = problema(registro.resultado?.diagnostico_id);
+  const feitos = [...(a.tratamentos || []), a.outro && `Outro: ${a.outro}`].filter(Boolean);
+  const texto = [
+    "Conilon Vivo — retorno",
+    `Código: ${registro.id}`,
+    registro.produtor && `Produtor: ${nomeProdutor(registro.produtor)}`,
+    p && `Problema: ${p.nome}`,
+    `Achou na lavoura: ${RECONHECEU[a.reconheceu] || "não respondeu"}`,
+    `Tratamento: ${a.nao_tratou ? "Ainda não fiz" : (feitos.join("; ") || "não respondeu")}`,
+    `Resultado: ${RESOLVEU[a.resolveu] || "não respondeu"}`,
+    a.obs && `Observação: ${a.obs}`,
+    `Data: ${dataBR(new Date().toISOString())}`,
+  ].filter(Boolean).join("\n");
+  if (navigator.share) {
+    try { await navigator.share({ text: texto, title: "Retorno do caso" }); } catch (e) { if (e.name !== "AbortError") throw e; else return; }
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+  }
+  a.enviado_em = new Date().toISOString();
+  registro.acompanhamento = a;
+  await salvar(registro);
 }
 
 const IDS_VALIDOS = () => [...base.problemas.map((p) => p.id), "saudavel", "nao_identificado"];
@@ -325,7 +361,11 @@ const telas = {
         <button class="botao" data-acao="tentar" data-id="${r.id}">Tentar de novo</button>
         <button class="botao secundario" data-acao="apagar" data-id="${r.id}">Apagar</button>`;
     }
-    return cab + renderDiagnostico(r.resultado) + `
+    const comAcompanhamento = r.resultado.foto_boa && problema(r.resultado.diagnostico_id);
+    return cab
+      + (comAcompanhamento ? `<button class="atalho-acomp" data-acao="ir-acompanhamento">✍️ Já cuidou da lavoura? Conte como foi ↓</button>` : "")
+      + renderDiagnostico(r.resultado)
+      + (comAcompanhamento ? renderAcompanhamento(r) : "") + `
       <button class="botao secundario" data-acao="apagar" data-id="${r.id}">Apagar do histórico</button>`;
   },
 
@@ -340,9 +380,11 @@ const telas = {
         const d = r.resultado;
         titulo = !d.foto_boa ? "Foto precisa ser refeita" : (problema(d.diagnostico_id)?.nome || (d.diagnostico_id === "saudavel" ? "Planta sadia" : "Não identificado"));
       }
+      const fase = faseDoCaso(r);
       return `<button class="link-lista" data-ir="resultado" data-id="${r.id}">
         <img src="${r.miniatura}" alt="">
-        <div><b>${esc(titulo)}</b><div class="meta">${esc(r.parte)}${r.talhao ? " · " + esc(r.talhao) : ""}<br>${dataBR(r.data)}</div></div>
+        <div><b>${esc(titulo)}</b><div class="meta">${esc(r.parte)}${r.talhao ? " · " + esc(r.talhao) : ""}<br>${dataBR(r.data)}</div>
+          ${fase ? `<span class="fase ${fase.classe}">${fase.texto}</span>` : ""}</div>
         <span class="seta" aria-hidden="true">›</span></button>`;
     }).join("");
   },
@@ -383,8 +425,28 @@ const telas = {
         <p><b>Assistência técnica gratuita:</b> procure o escritório local do <b>Incaper</b> no seu município.</p>
         <a class="botao secundario" href="https://incaper.es.gov.br" target="_blank" rel="noopener">Site do Incaper</a>
       </div>
+      <h2>Seus dados</h2>
+      <div class="cartao">
+        <p>${produtor() ? esc(nomeProdutor(produtor())) : "Você ainda não preencheu seus dados."}</p>
+        <button class="botao secundario" data-ir="cadastro">${produtor() ? "Mudar meus dados" : "Preencher meus dados"}</button>
+      </div>
       <p class="rodape-aviso">Versão de testes · base de pragas ${esc(base.versao)}</p>
       ${status.precisa_codigo ? `<button class="botao secundario" data-acao="trocar-codigo">Trocar código de acesso</button>` : ""}`;
+  },
+
+  cadastro() {
+    const p = produtor() || {};
+    return `<h1>Seus dados</h1>
+      <p class="suave">Vão junto com as fotos, para saber de quem é cada lavoura. Ficam guardados só neste celular.</p>
+      <label for="cad-nome">Seu nome</label>
+      <input id="cad-nome" type="text" value="${esc(p.nome)}" placeholder="Ex.: João da Silva" maxlength="60" autocomplete="name">
+      <label for="cad-comunidade">Comunidade ou córrego (opcional)</label>
+      <input id="cad-comunidade" type="text" value="${esc(p.comunidade)}" placeholder="Ex.: Córrego Bley" maxlength="60">
+      <label for="cad-municipio">Município</label>
+      <input id="cad-municipio" type="text" value="${esc(p.municipio)}" placeholder="Ex.: Jaguaré" maxlength="40">
+      <label for="cad-telefone">Telefone com WhatsApp (opcional)</label>
+      <input id="cad-telefone" type="tel" value="${esc(p.telefone)}" placeholder="Ex.: 27 99999-0000" maxlength="20" autocomplete="tel">
+      <button class="botao" data-acao="salvar-cadastro">Salvar</button>`;
   },
 
   codigo() {
@@ -467,14 +529,63 @@ function renderDiagnostico(d) {
     ${avisoFinal()}`;
 }
 
+// Em que pé está o caso, para o histórico.
+function faseDoCaso(r) {
+  if (r.status !== "pronto" || !problema(r.resultado?.diagnostico_id) || !r.resultado.foto_boa) return null;
+  const a = r.acompanhamento || {};
+  if (a.resolveu === "sim") return { classe: "ok", texto: "✅ Resolvido" };
+  if (a.resolveu === "nao") return { classe: "ruim", texto: "⚠️ Não resolveu" };
+  if (a.resolveu === "em_parte") return { classe: "meio", texto: "🌱 Melhorando" };
+  if (a.tratamentos?.length || a.outro) return { classe: "meio", texto: "🔧 Em tratamento" };
+  if (a.reconheceu === "nao") return { classe: "ruim", texto: "❓ Não achou na lavoura" };
+  return { classe: "falta", texto: "✍️ Conte como foi" };
+}
+
+function renderAcompanhamento(r) {
+  const a = r.acompanhamento || {};
+  const p = problema(r.resultado.diagnostico_id);
+  const botoes = (campo, opcoes) => `<div class="opcoes" role="group">${Object.entries(opcoes).map(([valor, rotulo]) =>
+    `<button data-acomp="${campo}" data-valor="${valor}" data-id="${r.id}" aria-pressed="${a[campo] === valor}">${rotulo}</button>`).join("")}</div>`;
+  const tratamentos = [...p.tratamentos].sort((x, y) => x.nivel - y.nivel);
+  return `<h2 id="acompanhamento">Como foi na lavoura?</h2>
+    <div class="cartao acompanhamento">
+      <h3>1. Você achou esse problema na lavoura?</h3>
+      ${botoes("reconheceu", RECONHECEU)}
+      <h3>2. O que você já fez?</h3>
+      <div class="opcoes coluna" role="group">
+        ${tratamentos.map((t) => `<button data-acomp="tratamentos" data-valor="${esc(t.titulo)}" data-id="${r.id}" aria-pressed="${!!a.tratamentos?.includes(t.titulo)}">${esc(t.titulo)}</button>`).join("")}
+        <button data-acomp="nao_tratou" data-valor="1" data-id="${r.id}" aria-pressed="${!!a.nao_tratou}">Ainda não fiz nada</button>
+      </div>
+      <label for="acomp-outro">Fez outra coisa? Qual? (opcional)</label>
+      <input id="acomp-outro" type="text" value="${esc(a.outro)}" maxlength="120" placeholder="Ex.: passei calda bordalesa">
+      <h3>3. Resolveu?</h3>
+      ${botoes("resolveu", RESOLVEU)}
+      <label for="acomp-obs">Quer contar mais alguma coisa? (opcional)</label>
+      <textarea id="acomp-obs" maxlength="500" placeholder="Ex.: melhorou no talhão de cima, no de baixo continua">${esc(a.obs)}</textarea>
+      <button class="botao" data-acao="enviar-retorno" data-id="${r.id}">📤 Enviar retorno pelo WhatsApp</button>
+      <p class="suave">${a.enviado_em ? `Último retorno enviado em ${dataBR(a.enviado_em)}.` : "Mande o retorno para quem fez a análise. Assim dá para acompanhar sua lavoura."}
+        Se piorar ou não resolver, procure o <b>Incaper</b> (gratuito).</p>
+    </div>`;
+}
+
+// Guarda o que foi digitado no acompanhamento sem precisar de botão "salvar".
+async function guardarTextosDoAcompanhamento(id) {
+  const outro = document.getElementById("acomp-outro");
+  if (!outro) return null;
+  const r = await buscar(id);
+  r.acompanhamento = { ...(r.acompanhamento || {}), outro: outro.value.trim(), obs: document.getElementById("acomp-obs").value.trim() };
+  return r;
+}
+
 function avisoFinal() {
   return `<p class="rodape-aviso">Orientação inicial, não substitui o técnico. Produto químico só com receituário agronômico, EPI e respeito à carência. Assistência gratuita: escritório local do Incaper.</p>`;
 }
 
-function mostrarErro(msg) {
-  tela.insertAdjacentHTML("afterbegin", `<div class="aviso erro">${esc(msg)}</div>`);
+function mostrarErro(msg, classe = "erro") {
+  tela.insertAdjacentHTML("afterbegin", `<div class="aviso ${classe}">${esc(msg)}</div>`);
   window.scrollTo(0, 0);
 }
+const mostrarAviso = (msg) => mostrarErro(msg, "");
 
 async function ir(rota, id) {
   if (status.precisa_codigo && !lerLocal("codigo") && rota !== "sobre") rota = "codigo";
@@ -488,7 +599,7 @@ async function ir(rota, id) {
 
 // ---------- ações ----------
 document.addEventListener("click", async (e) => {
-  const alvo = e.target.closest("[data-ir], [data-acao], [data-parte]");
+  const alvo = e.target.closest("[data-ir], [data-acao], [data-parte], [data-acomp]");
   if (!alvo) return;
 
   if (alvo.dataset.ir) return ir(alvo.dataset.ir, alvo.dataset.id);
@@ -496,6 +607,29 @@ document.addEventListener("click", async (e) => {
   if (alvo.dataset.parte) {
     rascunho.parte = alvo.dataset.parte;
     document.querySelectorAll("[data-parte]").forEach((b) => b.setAttribute("aria-pressed", b === alvo));
+    return;
+  }
+
+  if (alvo.dataset.acomp) {
+    const r = await guardarTextosDoAcompanhamento(alvo.dataset.id);
+    const a = r.acompanhamento;
+    const { acomp: campo, valor } = alvo.dataset;
+    if (campo === "tratamentos") {
+      const lista = new Set(a.tratamentos || []);
+      lista.has(valor) ? lista.delete(valor) : lista.add(valor);
+      a.tratamentos = [...lista];
+      if (lista.size) a.nao_tratou = false;
+    } else if (campo === "nao_tratou") {
+      a.nao_tratou = !a.nao_tratou;
+      if (a.nao_tratou) a.tratamentos = [];
+    } else {
+      a[campo] = a[campo] === valor ? null : valor;
+    }
+    a.atualizado_em = new Date().toISOString();
+    await salvar(r);
+    const y = window.scrollY;
+    await ir("resultado", r.id);
+    window.scrollTo(0, y);
     return;
   }
 
@@ -519,10 +653,17 @@ document.addEventListener("click", async (e) => {
 
     case "enviar": {
       if (!rascunho.parte) return mostrarErro("Escolha qual parte da planta aparece na foto.");
+      if (!produtor()) {
+        guardarCamposDoRascunho();
+        voltarDoCadastro = "confirmar";
+        await ir("cadastro");
+        return mostrarAviso("Antes de enviar, preencha seus dados. É só na primeira vez.");
+      }
       rascunho.talhao = document.getElementById("talhao").value.trim();
       rascunho.obs = document.getElementById("obs").value.trim();
       gravarLocal("ultimo-talhao", rascunho.talhao);
-      const registro = { id: novoCodigo(), data: new Date().toISOString(), status: "aguardando", ...rascunho };
+      const { nome, comunidade, municipio, telefone } = produtor();
+      const registro = { id: novoCodigo(), data: new Date().toISOString(), status: "aguardando", ...rascunho, produtor: { nome, comunidade, municipio, telefone } };
       rascunho = null;
       await salvar(registro);
       await ir("resultado", registro.id);
@@ -563,6 +704,31 @@ document.addEventListener("click", async (e) => {
       await apagar(alvo.dataset.id);
       return ir("historico");
 
+    case "enviar-retorno": {
+      const r = await guardarTextosDoAcompanhamento(alvo.dataset.id);
+      await salvar(r);
+      try { await enviarRetorno(r); } catch (erro) { return mostrarErro("Não consegui abrir o envio: " + erro.message); }
+      const y = window.scrollY;
+      await ir("resultado", r.id);
+      window.scrollTo(0, y);
+      return;
+    }
+
+    case "ir-acompanhamento":
+      return document.getElementById("acompanhamento")?.scrollIntoView({ behavior: "smooth" });
+
+    case "salvar-cadastro": {
+      const campo = (id) => document.getElementById(id).value.trim();
+      const dados = { nome: campo("cad-nome"), comunidade: campo("cad-comunidade"), municipio: campo("cad-municipio"), telefone: campo("cad-telefone") };
+      if (!dados.nome || !dados.municipio) return mostrarErro("Preencha pelo menos o nome e o município.");
+      gravarLocal("produtor", JSON.stringify(dados));
+      const destino = voltarDoCadastro && rascunho ? voltarDoCadastro : "inicio";
+      voltarDoCadastro = null;
+      await ir(destino);
+      if (destino === "confirmar") mostrarAviso("Pronto! Agora toque em Enviar para análise.");
+      return;
+    }
+
     case "salvar-codigo": {
       const valor = document.getElementById("codigo").value.trim();
       if (!valor) return;
@@ -578,7 +744,7 @@ document.addEventListener("click", async (e) => {
 
 function rotaDoEndereco() {
   const [rota, id] = location.hash.slice(1).split("/");
-  return telas[rota] && !["confirmar", "codigo"].includes(rota) ? [rota, id] : ["inicio"];
+  return telas[rota] && !["confirmar", "codigo", "cadastro"].includes(rota) ? [rota, id] : ["inicio"];
 }
 window.addEventListener("popstate", () => {
   const [rota, id] = rotaDoEndereco();
