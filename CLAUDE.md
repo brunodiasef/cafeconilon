@@ -14,6 +14,7 @@ O produtor manda as fotos pelo app, o Claude analisa, grava o laudo no banco e o
    de prejuízo, recomende o Incaper (gratuito).
 
 `node nuvem.js casos` mostra todos os casos e o que cada produtor contou ("achou", "resolveu").
+`node nuvem.js testar` confere se a chave funciona (primeira coisa a rodar numa sessão nova).
 Produtor esqueceu a senha: `node nuvem.js senha TELEFONE` e passe a senha nova ao Bruno.
 O acesso ao banco vem da variável `FIREBASE_SERVICE_ACCOUNT`. Sem ela, diga ao Bruno; não tente outro caminho.
 

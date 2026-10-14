@@ -1,6 +1,7 @@
 // Ferramenta do Claude/Bruno para o banco do app (Firebase), com acesso de administrador.
 //
 // Uso:
+//   node nuvem.js testar                 confere se a chave de acesso funciona
 //   node nuvem.js pendentes              lista os pedidos sem laudo e baixa as fotos em fotos-recebidas/
 //   node nuvem.js laudo laudos/laudo-X.json   grava o laudo no pedido: o produtor vê na hora
 //   node nuvem.js casos                  lista todos os casos e em que pé estão
@@ -28,13 +29,31 @@ function conectar() {
     process.env.FIREBASE_AUTH_EMULATOR_HOST ??= "127.0.0.1:9099";
     return initializeApp({ projectId: "demo-conilon" });
   }
-  const chave = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!chave) throw new Error("falta a variável FIREBASE_SERVICE_ACCOUNT com a chave da conta de serviço do Firebase");
-  const conta = JSON.parse(chave);
+  const conta = lerChave(process.env.FIREBASE_SERVICE_ACCOUNT);
   return initializeApp({ credential: cert(conta), projectId: conta.project_id });
 }
-const app = conectar();
-const db = getFirestore(app);
+
+// Lê a chave da variável de ambiente, tolerando o que costuma acontecer ao copiar pelo celular
+// (aspas sobrando, quebras de linha dentro da chave privada). Nunca mostra a chave nas mensagens.
+function lerChave(texto) {
+  if (!texto?.trim()) throw new Error("falta a variável FIREBASE_SERVICE_ACCOUNT com a chave da conta de serviço do Firebase");
+  let t = texto.trim().replace(/^['"‘’“”]+|['"‘’“”]+$/g, "").trim();
+  let conta;
+  try {
+    conta = JSON.parse(t);
+  } catch {
+    // Quebras de linha de verdade dentro de "private_key" deixam o JSON inválido: volta para \n.
+    t = t.replace(/("private_key"\s*:\s*")([\s\S]*?)(")/, (_, a, chave, b) => a + chave.replace(/\r?\n/g, "\\n") + b);
+    try { conta = JSON.parse(t); } catch {
+      throw new Error(`a chave em FIREBASE_SERVICE_ACCOUNT está incompleta ou com pedaço faltando (${t.length} caracteres; começa com "${t[0] || ""}" e termina com "${t.at(-1) || ""}"; o certo é começar com { e terminar com })`);
+    }
+  }
+  const faltando = ["type", "project_id", "private_key", "client_email"].filter((c) => !conta[c]);
+  if (faltando.length) throw new Error(`a chave em FIREBASE_SERVICE_ACCOUNT não tem: ${faltando.join(", ")}`);
+  if (!/BEGIN PRIVATE KEY[\s\S]+END PRIVATE KEY/.test(conta.private_key)) throw new Error("a chave privada está cortada (falta o BEGIN ou o END PRIVATE KEY)");
+  return conta;
+}
+let app, db; // conectados em main(), para que um erro na chave vire uma mensagem clara
 
 const nome = (id) => base.problemas.find((p) => p.id === id)?.nome || { saudavel: "Planta sadia", nao_identificado: "Não identificado" }[id] || id;
 const lugar = (p) => [p?.comunidade, p?.municipio].filter(Boolean).join(", ");
@@ -106,10 +125,18 @@ async function trocarSenha(tel, nova) {
   console.log(`OK  senha nova de ${d}: ${senha}`);
 }
 
+// Confere se a chave funciona, sem mostrar nada dela.
+async function testar() {
+  await db.listCollections();
+  console.log(`OK  chave funcionando. Projeto: ${app.options.projectId}`);
+}
+
 const [comando, ...resto] = args;
-const comandos = { pendentes, laudo: gravarLaudo, casos: listarCasos, admin: tornarAdmin, senha: trocarSenha };
+const comandos = { testar, pendentes, laudo: gravarLaudo, casos: listarCasos, admin: tornarAdmin, senha: trocarSenha };
 try {
-  if (!comandos[comando]) throw new Error("uso: node nuvem.js pendentes | laudo <arquivo> | casos | admin <email> | senha <telefone> [nova]");
+  app = conectar();
+  db = getFirestore(app);
+  if (!comandos[comando]) throw new Error("uso: node nuvem.js testar | pendentes | laudo <arquivo> | casos | admin <email> | senha <telefone> [nova]");
   await comandos[comando](...resto);
   process.exit(0);
 } catch (erro) {
