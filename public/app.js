@@ -60,17 +60,40 @@ function redimensionar(img, max, qualidade) {
   return c.toDataURL("image/jpeg", qualidade);
 }
 
+// Um pedido pode ter até MAX_FOTOS fotos do mesmo problema (ex.: folha por cima, por baixo e o fruto).
+const MAX_FOTOS = 4;
+let adicionando = false; // true quando a foto escolhida entra no pedido em andamento
+const fotosDe = (r) => r.fotos || [r.foto]; // registros antigos têm só "foto"
+
 async function fotoEscolhida(evento) {
-  const arquivo = evento.target.files?.[0];
+  const arquivos = [...(evento.target.files || [])];
   evento.target.value = "";
-  if (!arquivo) return;
+  if (!arquivos.length) return;
   try {
-    const img = await carregarImagem(arquivo);
-    rascunho = { foto: redimensionar(img, 1280, 0.82), miniatura: redimensionar(img, 200, 0.7), parte: "Folha", talhao: lerLocal("ultimo-talhao") || "", obs: "" };
+    if (!adicionando || !rascunho) {
+      rascunho = { fotos: [], parte: "Folha", talhao: lerLocal("ultimo-talhao") || "", obs: "" };
+    } else {
+      guardarCamposDoRascunho();
+    }
+    for (const arquivo of arquivos.slice(0, MAX_FOTOS - rascunho.fotos.length)) {
+      const img = await carregarImagem(arquivo);
+      rascunho.fotos.push(redimensionar(img, 1280, 0.82));
+      if (rascunho.fotos.length === 1) rascunho.miniatura = redimensionar(img, 200, 0.7);
+    }
+    rascunho.foto = rascunho.fotos[0];
     ir("confirmar");
   } catch (e) {
     mostrarErro(e.message);
+  } finally {
+    adicionando = false;
   }
+}
+
+function guardarCamposDoRascunho() {
+  const talhao = document.getElementById("talhao");
+  if (!rascunho || !talhao) return;
+  rascunho.talhao = talhao.value.trim();
+  rascunho.obs = document.getElementById("obs").value.trim();
 }
 document.getElementById("camera").addEventListener("change", fotoEscolhida);
 document.getElementById("galeria").addEventListener("change", fotoEscolhida);
@@ -83,8 +106,9 @@ function novoCodigo() {
 }
 
 // Escreve o código e os dados na própria foto: assim o código chega mesmo se o WhatsApp renomear a imagem.
-async function carimbar(registro) {
-  const img = await carregarImagem(await (await fetch(registro.foto)).blob());
+async function carimbar(registro, indice) {
+  const fotos = fotosDe(registro);
+  const img = await carregarImagem(await (await fetch(fotos[indice])).blob());
   const tamanho = Math.max(18, Math.round(img.width / 28));
   const faixa = tamanho * 4.2;
   const c = document.createElement("canvas");
@@ -96,7 +120,8 @@ async function carimbar(registro) {
   g.fillRect(0, img.height, c.width, faixa);
   g.fillStyle = "#fff";
   g.font = `bold ${Math.round(tamanho * 1.4)}px sans-serif`;
-  g.fillText(`CÓDIGO: ${registro.id}`, tamanho, img.height + tamanho * 1.7);
+  const numero = fotos.length > 1 ? `  ·  FOTO ${indice + 1} DE ${fotos.length}` : "";
+  g.fillText(`CÓDIGO: ${registro.id}${numero}`, tamanho, img.height + tamanho * 1.7, c.width - tamanho * 2);
   g.font = `${tamanho}px sans-serif`;
   const linha = [registro.parte, registro.talhao, dataBR(registro.data)].filter(Boolean).join(" · ");
   g.fillText(linha, tamanho, img.height + tamanho * 3.2, c.width - tamanho * 2);
@@ -104,26 +129,33 @@ async function carimbar(registro) {
 }
 
 async function enviarParaAnalise(registro) {
-  const arquivo = new File([await carimbar(registro)], `conilon-${registro.id}.jpg`, { type: "image/jpeg" });
+  const total = fotosDe(registro).length;
+  const arquivos = [];
+  for (let i = 0; i < total; i++) {
+    const nome = total > 1 ? `conilon-${registro.id}-${i + 1}.jpg` : `conilon-${registro.id}.jpg`;
+    arquivos.push(new File([await carimbar(registro, i)], nome, { type: "image/jpeg" }));
+  }
   const texto = [
     "Conilon Vivo — pedido de análise",
-    `Código: ${registro.id}`,
+    `Código: ${registro.id}${total > 1 ? ` (${total} fotos)` : ""}`,
     `Parte: ${registro.parte}`,
     registro.talhao && `Talhão: ${registro.talhao}`,
     registro.obs && `Observação: ${registro.obs}`,
   ].filter(Boolean).join("\n");
-  if (navigator.canShare?.({ files: [arquivo] })) {
+  if (navigator.canShare?.({ files: arquivos })) {
     try {
-      await navigator.share({ files: [arquivo], text: texto, title: "Pedido de análise" });
+      await navigator.share({ files: arquivos, text: texto, title: "Pedido de análise" });
     } catch (e) {
       if (e.name !== "AbortError") throw e;
     }
     return;
   }
-  // Computador ou navegador sem compartilhamento: baixa a foto para enviar manualmente.
-  const link = Object.assign(document.createElement("a"), { href: URL.createObjectURL(arquivo), download: arquivo.name });
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+  // Computador ou navegador sem compartilhamento: baixa as fotos para enviar manualmente.
+  for (const arquivo of arquivos) {
+    const link = Object.assign(document.createElement("a"), { href: URL.createObjectURL(arquivo), download: arquivo.name });
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+  }
 }
 
 const IDS_VALIDOS = () => [...base.problemas.map((p) => p.id), "saudavel", "nao_identificado"];
@@ -166,7 +198,7 @@ async function enviar(registro) {
   const resposta = await fetch("/api/diagnosticar", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imagem: registro.foto.split(",")[1], parte: registro.parte, observacao: registro.obs, codigo: lerLocal("codigo") || "" }),
+    body: JSON.stringify({ imagens: fotosDe(registro).map((f) => f.split(",")[1]), parte: registro.parte, observacao: registro.obs, codigo: lerLocal("codigo") || "" }),
   });
   const dados = await resposta.json().catch(() => ({}));
   if (resposta.status === 401) gravarLocal("codigo", "");
@@ -235,8 +267,20 @@ const telas = {
 
   confirmar() {
     if (!rascunho) return telas.inicio();
+    const cabe = rascunho.fotos.length < MAX_FOTOS;
     return `
-      <img class="foto" src="${rascunho.foto}" alt="Foto escolhida">
+      <div class="fotos-pedido">
+        ${rascunho.fotos.map((f, i) => `<div class="miniatura">
+          <img src="${f}" alt="Foto ${i + 1}">
+          ${rascunho.fotos.length > 1 ? `<button data-acao="remover-foto" data-indice="${i}" aria-label="Remover foto ${i + 1}">✕</button>` : ""}
+        </div>`).join("")}
+      </div>
+      ${cabe ? `<div class="adicionar">
+          <button class="botao secundario" data-acao="adicionar-camera">📷 + Outra foto</button>
+          <button class="botao secundario" data-acao="adicionar-galeria">🖼️ + Da galeria</button>
+        </div>
+        <p class="suave">Mais fotos do mesmo problema ajudam: folha por cima e por baixo, o fruto, o pé inteiro. Até ${MAX_FOTOS} fotos.</p>`
+        : `<p class="suave">Limite de ${MAX_FOTOS} fotos neste pedido.</p>`}
       <label>Qual parte da planta?</label>
       <div class="opcoes" role="group">
         ${PARTES.map((p) => `<button data-parte="${p}" aria-pressed="${p === rascunho.parte}">${p}</button>`).join("")}
@@ -247,15 +291,17 @@ const telas = {
       <textarea id="obs" placeholder="Ex.: começou há 2 semanas, está em vários pés..." maxlength="500">${esc(rascunho.obs)}</textarea>
       ${status.modo === "manual"
         ? `<button class="botao" data-acao="enviar">📤 Enviar para análise</button>
-           <p class="suave">A foto vai com um código. Envie pelo WhatsApp e aguarde o arquivo da análise.</p>`
-        : `<button class="botao" data-acao="analisar">Analisar foto</button>`}
-      <button class="botao secundario" data-acao="camera">Tirar outra foto</button>`;
+           <p class="suave">As fotos vão com um código. Envie pelo WhatsApp e aguarde o arquivo da análise.</p>`
+        : `<button class="botao" data-acao="analisar">Analisar</button>`}
+      <button class="botao secundario" data-acao="camera">Começar de novo</button>`;
   },
 
   async resultado(id) {
     const r = await buscar(id);
     if (!r) return telas.historico();
-    const cab = `<img class="foto" src="${r.foto}" alt="Foto analisada">
+    const [primeira, ...outras] = fotosDe(r);
+    const cab = `<img class="foto" src="${primeira}" alt="Foto analisada">
+      ${outras.length ? `<div class="fotos-pedido">${outras.map((f, i) => `<div class="miniatura"><img src="${f}" alt="Foto ${i + 2}"></div>`).join("")}</div>` : ""}
       <p class="suave">${esc(r.parte)}${r.talhao ? " · " + esc(r.talhao) : ""} · ${dataBR(r.data)}</p>`;
 
     if (r.status === "pendente") {
@@ -486,6 +532,20 @@ document.addEventListener("click", async (e) => {
       return;
 
     case "importar": return document.getElementById("laudo").click();
+
+    case "adicionar-camera":
+    case "adicionar-galeria":
+      adicionando = true;
+      return document.getElementById(alvo.dataset.acao === "adicionar-camera" ? "camera" : "galeria").click();
+
+    case "remover-foto":
+      guardarCamposDoRascunho();
+      rascunho.fotos.splice(Number(alvo.dataset.indice), 1);
+      rascunho.foto = rascunho.fotos[0];
+      if (Number(alvo.dataset.indice) === 0) {
+        rascunho.miniatura = redimensionar(await carregarImagem(await (await fetch(rascunho.foto)).blob()), 200, 0.7);
+      }
+      return ir("confirmar");
 
     case "tentar": {
       const r = await buscar(alvo.dataset.id);

@@ -138,3 +138,14 @@ ul.lista li { margin-bottom: 6px; }
 
 select { width: 100%; font: inherit; padding: 12px; border: 2px solid var(--borda); border-radius: 12px; background: var(--papel); }
 .aviso label { font-weight: 700; }
+
+/* Várias fotos no mesmo pedido */
+.fotos-pedido { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.miniatura { position: relative; }
+.miniatura img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; display: block; background: #ddd; }
+.miniatura button {
+  position: absolute; top: 6px; right: 6px; width: 36px; height: 36px; border-radius: 50%;
+  border: 0; background: rgba(0, 0, 0, .65); color: #fff; font-size: 18px; line-height: 1;
+}
+.adicionar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adicionar .botao { font-size: 17px; min-height: 52px; margin-bottom: 4px; }
