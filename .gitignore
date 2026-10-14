@@ -1,0 +1,5 @@
+node_modules/
+.env
+# Dados dos produtores: ficam só no computador, nunca no repositório público
+fotos-recebidas/
+laudos/*.json

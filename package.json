@@ -1,0 +1,19 @@
+{
+  "name": "conilon-vivo",
+  "version": "1.0.0",
+  "description": "App para identificar pragas do café conilon por foto e indicar o tratamento mais barato",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

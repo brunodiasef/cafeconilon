@@ -1,0 +1,477 @@
+{
+  "versao": "2026-10-13",
+  "aviso_revisao": "Conteúdo inicial para fase de testes. Deve ser revisado por engenheiro agrônomo (de preferência com técnicos do Incaper) antes de uso amplo.",
+  "niveis_custo": {
+    "1": "Sem custo",
+    "2": "Baixo custo",
+    "3": "Custo médio",
+    "4": "Custo maior"
+  },
+  "problemas": [
+    {
+      "id": "broca",
+      "nome": "Broca-do-café",
+      "nome_cientifico": "Hypothenemus hampei",
+      "tipo": "Praga (inseto)",
+      "onde": "Fruto",
+      "sintomas": [
+        "Furinho redondo, do tamanho de uma cabeça de alfinete, na ponta (coroa) do fruto",
+        "Pó escuro saindo do furo",
+        "Dentro do grão: um besourinho preto bem pequeno e larvinhas brancas",
+        "Grãos furados, mais leves, e frutos caindo antes da hora"
+      ],
+      "como_avaliar": "Pegue 100 frutos de vários pés diferentes do talhão. Se 3 a 5 ou mais estiverem furados, é hora de agir.",
+      "por_que_acontece": "A broca passa a entressafra escondida nos frutos que ficam na planta e no chão depois da colheita. Quando os frutos novos se formam, ela sai e ataca.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Colheita bem feita e repasse",
+          "como_fazer": "Não deixe frutos na planta nem no chão depois da colheita. Faça o repasse e recolha os frutos caídos. É a medida mais importante e a mais barata contra a broca.",
+          "quando": "Logo após a colheita"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Vigiar todo mês",
+          "como_fazer": "Conte os frutos furados (100 frutos por talhão) uma vez por mês, a partir da formação dos frutos novos. Anote no histórico do app.",
+          "quando": "Da formação dos frutos até a colheita"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Caseiro",
+          "titulo": "Armadilha de garrafa PET",
+          "como_fazer": "Garrafa PET com uma janela recortada na lateral e água com detergente no fundo. Pendure dentro dela um frasquinho com álcool e metanol (meio a meio) e um pouco de pó de café. Serve para saber quando a broca está voando e para capturar parte dela. Atenção: metanol é venenoso — use luvas e guarde longe de crianças. A quantidade de armadilhas por hectare deve ser combinada com o técnico.",
+          "quando": "Na entressafra e no início da formação dos frutos"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Biológico",
+          "titulo": "Fungo Beauveria bassiana",
+          "como_fazer": "Produto biológico (fungo que mata a broca). Use produto registrado para broca no café. Aplique no fim da tarde ou em dias úmidos, quando a broca está saindo dos frutos velhos para os novos.",
+          "quando": "No período em que a broca migra para os frutos novos"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Inseticida registrado para broca",
+          "como_fazer": "Só se a infestação passar do nível de controle mesmo com as medidas acima. Use apenas inseticida registrado para broca no café, com receituário agronômico, respeitando dose, intervalo de carência e uso de EPI.",
+          "quando": "No período de trânsito da broca, conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "bicho_mineiro",
+      "nome": "Bicho-mineiro",
+      "nome_cientifico": "Leucoptera coffeella",
+      "tipo": "Praga (lagarta pequena)",
+      "onde": "Folha",
+      "sintomas": [
+        "Manchas marrom-claras na parte de cima da folha, parecendo queimado",
+        "A pele da mancha solta fácil quando você puxa",
+        "Dentro da mancha pode ter uma lagartinha branca",
+        "Folhas caindo, principalmente no tempo seco e quente"
+      ],
+      "como_avaliar": "Olhe folhas do 3º ou 4º par a partir da ponta dos ramos, em vários pés. Muitas folhas com minas novas (com lagarta viva) indicam que precisa agir.",
+      "por_que_acontece": "Aparece mais no período seco e quente. Inseticidas usados sem necessidade matam as vespinhas que comem o bicho-mineiro e pioram o problema.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Proteger os inimigos naturais",
+          "como_fazer": "Vespas abrem as minas e comem as lagartas. Minas rasgadas são sinal de que elas estão trabalhando. Evite inseticida sem necessidade para não matar essas ajudantes.",
+          "quando": "Sempre"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Vigiar no período seco",
+          "como_fazer": "Conte folhas com minas novas a cada 15 dias na época seca. Anote no histórico do app.",
+          "quando": "Período seco"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Irrigação e quebra-vento",
+          "como_fazer": "Planta bem irrigada e protegida do vento seco sofre menos. Se você já irriga, mantenha a irrigação em dia na seca.",
+          "quando": "Período seco"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Inseticida registrado para bicho-mineiro",
+          "como_fazer": "Só quando a infestação estiver alta. Use produto registrado para bicho-mineiro no café, com receituário agronômico e EPI.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "cochonilha_roseta",
+      "nome": "Cochonilha-da-roseta",
+      "nome_cientifico": "Planococcus spp.",
+      "tipo": "Praga (inseto)",
+      "onde": "Roseta (entre os frutos) e ramos",
+      "sintomas": [
+        "Massa branca parecida com algodão ou farinha entre os frutos (na roseta)",
+        "Frutos murchando, secando e caindo",
+        "Muitas formigas subindo e descendo a planta",
+        "Folhas e frutos sujos de preto (fumagina)"
+      ],
+      "como_avaliar": "Abra as rosetas de vários ramos em pés diferentes. Comece a agir cedo: quando a massa branca cobre os frutos, o controle fica mais difícil.",
+      "por_que_acontece": "É uma das pragas mais importantes do conilon no ES. As formigas protegem a cochonilha em troca do melado que ela solta.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Poda e retirada dos ramos atacados",
+          "como_fazer": "Na poda, retire os ramos muito atacados e tire-os da lavoura. A poda programada de ciclo deixa a planta mais arejada e facilita o controle.",
+          "quando": "Na poda"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Proteger joaninhas e outros inimigos naturais",
+          "como_fazer": "Joaninhas e outros insetos comem a cochonilha. Evite inseticidas sem necessidade.",
+          "quando": "Sempre"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Controlar as formigas",
+          "como_fazer": "Sem as formigas, a cochonilha fica exposta aos inimigos naturais. Controle os formigueiros da lavoura com isca registrada ou como o técnico orientar.",
+          "quando": "Assim que perceber formigas na planta"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Inseticida registrado para cochonilha",
+          "como_fazer": "Use produto registrado para cochonilha no café, com receituário agronômico e EPI. Funciona melhor no começo da infestação, com o jato bem dirigido às rosetas.",
+          "quando": "No início da infestação, conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "cochonilha_escama",
+      "nome": "Cochonilha-verde (de escama)",
+      "nome_cientifico": "Coccus viridis",
+      "tipo": "Praga (inseto)",
+      "onde": "Folhas novas e brotos",
+      "sintomas": [
+        "Escamas verdes, ovais e achatadas grudadas nas folhas, ao longo da nervura",
+        "Mais comum em brotos e plantas novas",
+        "Formigas e fumagina (sujeira preta) nas folhas"
+      ],
+      "como_avaliar": "Veja principalmente lavoura nova e brotações. Poucas escamas espalhadas costumam ser controladas pela natureza.",
+      "por_que_acontece": "Aparece mais em lavoura nova e no período seco. Em tempo chuvoso, fungos naturais costumam controlar.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Esperar a ação dos inimigos naturais",
+          "como_fazer": "Joaninhas e fungos naturais (escamas ficando brancas ou marrons e secas) controlam a praga, principalmente nas chuvas. Evite inseticida sem necessidade.",
+          "quando": "Infestação leve"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Controlar as formigas",
+          "como_fazer": "As formigas protegem a cochonilha. Controlando as formigas, os inimigos naturais trabalham melhor.",
+          "quando": "Assim que perceber formigas"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Químico",
+          "titulo": "Óleo mineral ou vegetal registrado",
+          "como_fazer": "Óleos registrados para o café sufocam as escamas e agridem menos os inimigos naturais. Siga a dose do rótulo e não aplique no calor forte do dia.",
+          "quando": "Infestação moderada",
+          "precisa_receita": true
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Inseticida registrado",
+          "como_fazer": "Só em infestação forte, com produto registrado para o café, receituário agronômico e EPI.",
+          "quando": "Infestação forte",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "acaro_vermelho",
+      "nome": "Ácaro-vermelho",
+      "nome_cientifico": "Oligonychus ilicis",
+      "tipo": "Praga (ácaro)",
+      "onde": "Folha (parte de cima)",
+      "sintomas": [
+        "Folhas perdem o brilho e ficam cor de bronze ou avermelhadas por cima",
+        "Com uma lupa, dá para ver bichinhos vermelhos bem pequenos e uma teia fina",
+        "Pior no tempo seco e perto de estradas com muita poeira"
+      ],
+      "como_avaliar": "Use uma lupa na parte de cima das folhas. Se o bronzeado estiver se espalhando pela lavoura, procure o técnico.",
+      "por_que_acontece": "Aparece no tempo seco. A poeira e o uso de alguns inseticidas que matam os ácaros predadores favorecem a praga.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Proteger os ácaros predadores",
+          "como_fazer": "Existem ácaros do bem que comem o ácaro-vermelho. Evite inseticidas desnecessários, principalmente piretroides.",
+          "quando": "Sempre"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Irrigação e menos poeira",
+          "como_fazer": "Chuva e irrigação derrubam a população. Reduza a poeira perto da lavoura (quebra-vento, menos tráfego no carreador no seco).",
+          "quando": "Período seco"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Acaricida registrado",
+          "como_fazer": "Só em ataque forte e espalhado. Use acaricida registrado para o café, com receituário agronômico e EPI.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "ferrugem",
+      "nome": "Ferrugem",
+      "nome_cientifico": "Hemileia vastatrix",
+      "tipo": "Doença (fungo)",
+      "onde": "Folha (parte de baixo)",
+      "sintomas": [
+        "Manchas com pó amarelo-alaranjado na parte de BAIXO da folha",
+        "Por cima da folha, manchas amareladas",
+        "Muitas folhas caindo e ramos ficando pelados"
+      ],
+      "como_avaliar": "Vire as folhas e procure o pó laranja. No conilon, a ferrugem varia muito de um clone para outro: anote quais clones estão mais atacados.",
+      "por_que_acontece": "Aparece no período quente e chuvoso. Plantas mal adubadas, muito carregadas e lavoura fechada (sem poda) sofrem mais.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Poda e adubação equilibrada",
+          "como_fazer": "A poda programada de ciclo deixa a lavoura arejada. A adubação conforme análise de solo deixa a planta mais forte.",
+          "quando": "Na poda e nas adubações"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Clones tolerantes na renovação",
+          "como_fazer": "Ao renovar ou replantar, use clones tolerantes à ferrugem recomendados pelo Incaper. Substitua os clones que sempre adoecem.",
+          "quando": "Na renovação da lavoura"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Caseiro",
+          "titulo": "Calda bordalesa (preventiva)",
+          "como_fazer": "Para 100 litros: 1 kg de sulfato de cobre dissolvido em água e 1 kg de cal virgem queimada à parte. Misture o cobre na cal (nunca o contrário). Use no mesmo dia. Protege as folhas, mas não cura as que já estão doentes. Use luvas e óculos.",
+          "quando": "Antes e no início do período chuvoso"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Químico",
+          "titulo": "Fungicida à base de cobre",
+          "como_fazer": "Fungicida cúprico registrado (oxicloreto ou hidróxido de cobre). É preventivo e de custo menor que os sistêmicos.",
+          "quando": "Antes e no início do período chuvoso",
+          "precisa_receita": true
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Fungicida sistêmico registrado",
+          "como_fazer": "Para ataque forte. Use fungicida sistêmico registrado para ferrugem no café, com receituário agronômico e EPI.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "cercosporiose",
+      "nome": "Cercosporiose (olho-pardo)",
+      "nome_cientifico": "Cercospora coffeicola",
+      "tipo": "Doença (fungo)",
+      "onde": "Folha e fruto",
+      "sintomas": [
+        "Manchas redondas marrons, com o centro claro (acinzentado) e uma borda amarela — parece um olho",
+        "Nos frutos: manchas escuras e afundadas; o fruto amadurece antes da hora e seca",
+        "Folhas caindo"
+      ],
+      "como_avaliar": "Ela costuma ser sinal de planta fraca, mal adubada ou com falta d'água. Olhe também a adubação e a irrigação.",
+      "por_que_acontece": "Está muito ligada à falta de adubo (principalmente nitrogênio e potássio), ao sol forte e à falta de água.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Análise de solo e adubação certa",
+          "como_fazer": "É a medida principal. Faça análise de solo e adube conforme a recomendação técnica. Planta bem nutrida quase não tem cercosporiose.",
+          "quando": "Antes do período de adubação"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Irrigação em dia",
+          "como_fazer": "Evite que a planta passe sede, principalmente quando estiver com muitos frutos.",
+          "quando": "Período seco"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Caseiro",
+          "titulo": "Calda bordalesa (preventiva)",
+          "como_fazer": "Mesma receita usada para a ferrugem (1 kg de sulfato de cobre + 1 kg de cal virgem em 100 litros). Protege, mas não resolve se a adubação estiver errada.",
+          "quando": "No período chuvoso"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Químico",
+          "titulo": "Fungicida à base de cobre",
+          "como_fazer": "Fungicida cúprico registrado, preventivo.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Fungicida sistêmico registrado",
+          "como_fazer": "Só em ataque forte nos frutos. Use produto registrado para cercosporiose no café, com receituário agronômico e EPI.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "seca_ponteiros",
+      "nome": "Seca-de-ponteiros / antracnose",
+      "nome_cientifico": "Colletotrichum spp. e outros",
+      "tipo": "Doença (fungo) e estresse da planta",
+      "onde": "Ponta dos ramos, folhas novas e chumbinhos",
+      "sintomas": [
+        "Ponta dos ramos secando de cima para baixo",
+        "Folhas novas escurecidas, queimadas",
+        "Manchas escuras nos ramos e queda dos chumbinhos (frutos novos)"
+      ],
+      "como_avaliar": "Muitas vezes começa com a planta esgotada: carga grande de frutos sem adubação suficiente, ou falta d'água.",
+      "por_que_acontece": "O fungo aproveita a planta fraca. Lavoura esgotada, mal adubada ou que passou por seca forte sofre mais.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Poda dos ramos secos",
+          "como_fazer": "Corte os ramos secos abaixo da parte doente e tire-os da lavoura.",
+          "quando": "Na poda"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Nutrição e água",
+          "como_fazer": "Adube conforme análise de solo e mantenha a irrigação. Planta forte se recupera.",
+          "quando": "Sempre"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Químico",
+          "titulo": "Fungicida à base de cobre",
+          "como_fazer": "Fungicida cúprico registrado, para proteger as brotações novas.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Fungicida registrado",
+          "como_fazer": "Em ataque forte, use fungicida registrado para o café, com receituário agronômico e EPI.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    },
+    {
+      "id": "deficiencia_nutricional",
+      "nome": "Falta de nutrientes (não é praga)",
+      "nome_cientifico": "Deficiência nutricional",
+      "tipo": "Problema de nutrição",
+      "onde": "Folhas",
+      "sintomas": [
+        "Nitrogênio: folhas mais velhas amarelando por igual; planta toda mais clara",
+        "Potássio: pontas e bordas das folhas velhas secas e marrons, como queimadas",
+        "Magnésio: folhas velhas amarelas entre as nervuras, com as nervuras verdes",
+        "Boro: folhas novas deformadas, com bordas tortas; ponteiros morrendo e muitos brotos",
+        "Zinco: folhas novas pequenas, estreitas e juntas em tufos"
+      ],
+      "como_avaliar": "Repare se o problema está nas folhas velhas (de baixo) ou nas novas (da ponta). Isso ajuda a saber qual nutriente está faltando. A análise de solo confirma.",
+      "por_que_acontece": "Falta de adubação, solo ácido sem calagem, seca ou carga muito grande de frutos.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Fazer análise de solo (e de folha)",
+          "como_fazer": "É o caminho mais barato: adubar no escuro gasta dinheiro à toa. Procure o Incaper ou um laboratório para coletar e interpretar a análise.",
+          "quando": "Uma vez por ano, antes das adubações"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Calagem",
+          "como_fazer": "Se o solo estiver ácido, o calcário melhora o aproveitamento do adubo e fornece cálcio e magnésio. A quantidade vem da análise de solo.",
+          "quando": "Conforme a análise"
+        },
+        {
+          "nivel": 3,
+          "tipo": "Manejo",
+          "titulo": "Adubação corrigida",
+          "como_fazer": "Corrija o nutriente que está faltando (no solo ou por adubo foliar, no caso de boro e zinco), na dose recomendada pela análise.",
+          "quando": "Conforme a análise"
+        }
+      ]
+    },
+    {
+      "id": "nematoide",
+      "nome": "Nematoides",
+      "nome_cientifico": "Meloidogyne spp.",
+      "tipo": "Praga (verme microscópico do solo)",
+      "onde": "Raiz",
+      "sintomas": [
+        "Plantas fracas, amareladas, que crescem pouco e murcham no calor",
+        "Problema aparece em manchas (reboleiras) na lavoura",
+        "Raízes com caroços (galhas), apodrecidas ou com a casca soltando"
+      ],
+      "como_avaliar": "A foto da folha não basta. Arranque raízes finas de uma planta doente e tire foto delas. Para confirmar, é preciso análise de nematoide em laboratório.",
+      "por_que_acontece": "Vêm em mudas contaminadas ou já estão no solo. Espalham-se com terra nas ferramentas e na água de enxurrada.",
+      "tratamentos": [
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Confirmar com análise de laboratório",
+          "como_fazer": "Antes de gastar com qualquer produto, confirme com análise de solo e raiz para nematoide.",
+          "quando": "Ao perceber reboleiras"
+        },
+        {
+          "nivel": 1,
+          "tipo": "Manejo",
+          "titulo": "Mudas sadias e limpeza de ferramentas",
+          "como_fazer": "Compre mudas de viveiro registrado. Limpe ferramentas e evite levar terra de áreas doentes para áreas sadias.",
+          "quando": "Sempre"
+        },
+        {
+          "nivel": 2,
+          "tipo": "Manejo",
+          "titulo": "Matéria orgânica e clones resistentes",
+          "como_fazer": "Matéria orgânica (esterco curtido, palha de café) ajuda a planta a conviver com o nematoide. Na renovação, use clones resistentes indicados pelo Incaper.",
+          "quando": "Na adubação e na renovação"
+        },
+        {
+          "nivel": 4,
+          "tipo": "Químico",
+          "titulo": "Nematicida registrado",
+          "como_fazer": "Custo alto e resultado variável. Só com diagnóstico confirmado e receituário agronômico.",
+          "quando": "Conforme orientação técnica",
+          "precisa_receita": true
+        }
+      ]
+    }
+  ]
+}

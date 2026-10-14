@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Conilon Vivo</title>
+  <meta name="description" content="Tire uma foto da planta e descubra a praga do café conilon e o tratamento mais barato.">
+  <meta name="theme-color" content="#1f5e2e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icone-192.png">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <button class="marca" data-ir="inicio" aria-label="Início">
+      <img src="icone.svg" alt="" width="36" height="36">
+      <span>Conilon <b>Vivo</b></span>
+    </button>
+    <span id="sinal" class="sinal" hidden>Sem sinal</span>
+  </header>
+
+  <main id="tela"></main>
+
+  <nav class="abas" aria-label="Menu">
+    <button data-ir="inicio"><span aria-hidden="true">📷</span>Foto</button>
+    <button data-ir="historico"><span aria-hidden="true">📋</span>Histórico</button>
+    <button data-ir="guia"><span aria-hidden="true">📖</span>Pragas</button>
+    <button data-ir="sobre"><span aria-hidden="true">ℹ️</span>Ajuda</button>
+  </nav>
+
+  <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+  <input id="galeria" type="file" accept="image/*" hidden>
+  <input id="laudo" type="file" accept=".json,application/json,text/plain" multiple hidden>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
