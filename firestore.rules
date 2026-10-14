@@ -1,0 +1,52 @@
+rules_version = '2';
+// Regras de acesso do Conilon Vivo.
+// - Bruno (admin): vê e mexe em tudo.
+// - Produtor: vê só os casos dele; cria pedidos; no caso dele só muda o acompanhamento.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function logado() { return request.auth != null; }
+    function admin() { return logado() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function eu(uid) { return logado() && request.auth.uid == uid; }
+    function soMudou(campos) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos); }
+
+    // Quem é admin. Só se cria pelo console do Firebase ou pelo nuvem.js.
+    match /admins/{uid} {
+      allow read: if eu(uid);
+      allow write: if false;
+    }
+
+    match /usuarios/{uid} {
+      allow read: if eu(uid) || admin();
+      allow create, delete: if admin();
+      allow update: if admin() || (eu(uid) && soMudou(['aceitou_termos_em']));
+    }
+
+    match /casos/{codigo} {
+      function doCaso() { return logado() && resource.data.produtor_uid == request.auth.uid; }
+
+      allow read: if admin() || doCaso();
+      allow create: if admin() || (logado()
+        && codigo.matches('^[A-HJKMNP-Z2-9]{6}$')
+        && request.resource.data.produtor_uid == request.auth.uid
+        && request.resource.data.status == 'aguardando'
+        && request.resource.data.laudo == null
+        && request.resource.data.n_fotos is int
+        && request.resource.data.n_fotos >= 1 && request.resource.data.n_fotos <= 4
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)));
+      allow update: if admin() || (doCaso() && soMudou(['acompanhamento', 'atualizado_em']));
+      allow delete: if admin();
+
+      // Fotos em tamanho grande, uma por documento.
+      match /fotos/{n} {
+        function casoDepois() { return getAfter(/databases/$(database)/documents/casos/$(codigo)).data; }
+        allow read: if admin() || (logado() && get(/databases/$(database)/documents/casos/$(codigo)).data.produtor_uid == request.auth.uid);
+        allow create: if admin() || (logado()
+          && casoDepois().produtor_uid == request.auth.uid
+          && casoDepois().status == 'aguardando'
+          && request.resource.data.dados is string
+          && request.resource.data.dados.size() < 1000000);
+        allow update, delete: if admin();
+      }
+    }
+  }
+}

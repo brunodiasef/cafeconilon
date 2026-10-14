@@ -3,49 +3,45 @@
 App web para o pequeno produtor de café conilon do Espírito Santo:
 **tira a foto → o app identifica a praga ou doença → mostra o tratamento do mais barato ao mais caro.**
 
-## Modo manual (atual, sem chave da API)
-
-1. O produtor tira a foto e toca **Enviar para análise**. A foto sai pelo WhatsApp com um **código** carimbado (ex.: `K7M2PX`).
-2. O Bruno passa a foto ao Claude Code nesta pasta. O Claude gera `laudos/laudo-K7M2PX.json` (roteiro em `CLAUDE.md`) e confere com `node validar-laudo.js`.
-3. O Bruno manda o arquivo de volta. O produtor toca **Importar análise** e o resultado fica salvo no histórico, na foto certa.
-
-### Cadastro e acompanhamento
-
-- No app, o produtor preenche **seus dados** (nome, comunidade, município, telefone) na primeira vez que envia uma foto. Eles vão junto com cada pedido.
-- Depois do laudo, o produtor responde **"Como foi na lavoura?"**: se achou o problema, o que fez e se resolveu. Toca em **Enviar retorno** e a resposta vai pelo WhatsApp.
-- O Bruno passa pedidos e retornos ao Claude, que mantém `produtores/cadastro.json` e gera o **painel** `produtores/painel.html`: cada agricultor, cada caso e o que precisa de atenção (sem retorno, não resolveu, não achou o problema).
-- `node cadastro.js validar | sincronizar | painel`. A pasta `produtores/` fica **fora do git** (dados pessoais).
-
-Quando houver chave da API (`.env`), o app passa sozinho para o **modo automático** (análise na hora).
-
 ## Como funciona
 
-- **Celular (pasta `public/`)**: app web que se instala na tela inicial. Funciona sem sinal: a foto fica guardada e é analisada quando a internet volta. O histórico fica no próprio celular.
-- **Servidor (`server.js`)**: recebe a foto e pergunta ao Claude (IA da Anthropic) qual é o problema. A chave da API fica só no servidor.
-- **Base de pragas (`public/dados/pragas.json`)**: sintomas e tratamentos escritos e revisáveis. **A IA só identifica o problema; os tratamentos vêm desta base**, não são inventados pela IA.
+- **Produtor**: entra no app com o **telefone e uma senha de 6 números** (o Bruno cadastra e passa a senha). Tira a foto e toca **Enviar para análise**. O laudo aparece no **Histórico**, com os tratamentos do mais barato ao mais caro. Depois conta no app se achou o problema, o que fez e se resolveu. Vê só os casos dele.
+- **Bruno (responsável)**: entra com e-mail. Vê o **Painel** (pedidos esperando laudo, casos que precisam de atenção, problemas mais vistos), cadastra **Produtores** e acompanha cada caso: foto → laudo → achou → tratou → resolvido.
+- **Laudo**: o Bruno pede ao Claude Code "analise os pedidos novos". O Claude baixa as fotos (`node nuvem.js pendentes`), faz o laudo e grava no app (`node nuvem.js laudo ...`). O produtor vê na hora. Roteiro em `CLAUDE.md`.
+- **Sem sinal**: o pedido fica guardado no celular e sobe sozinho quando a internet volta.
+- **Dados**: ficam no **Firebase** (Google), plano gratuito, que não adormece. Fotos e dados só são vistos pelo produtor dono e pelo Bruno; quem garante isso são as regras de `firestore.rules`, testadas em `testes/regras.test.mjs`.
+- **Base de pragas** (`public/dados/pragas.json`): sintomas e tratamentos escritos e revisáveis. **O laudo só identifica o problema; os tratamentos vêm desta base.**
 
 Pragas e doenças cobertas: broca, broca-dos-ramos, bicho-mineiro, cochonilha-da-roseta, cochonilha-verde, ácaro-vermelho, ferrugem, cercosporiose, seca-de-ponteiros, falta de nutrientes e nematoides.
 
-## Rodar no computador
+## Configurar o Firebase (uma vez)
+
+1. Em https://console.firebase.google.com, crie um projeto (ex.: `conilon-vivo`). Pode desligar o Google Analytics. Fica no plano gratuito (Spark): não precisa de cartão.
+2. **Authentication** → Começar → **E-mail/senha** → Ativar.
+3. **Firestore Database** → Criar banco → local `southamerica-east1` (São Paulo) → modo de produção.
+4. **Regras**: em Firestore → Regras, apague o que estiver lá, cole o conteúdo de `firestore.rules` e publique.
+5. **Sua conta**: Authentication → Usuários → Adicionar usuário (seu e-mail e uma senha forte).
+6. **Configuração do app**: Configurações do projeto → Seus apps → Web (`</>`) → registre o app e copie os valores de `firebaseConfig` para `public/firebase-config.js`.
+7. **Acesso do Claude**: Configurações do projeto → Contas de serviço → Gerar nova chave privada. Guarde o arquivo: ele dá acesso total ao banco. Coloque o conteúdo dele na variável de ambiente `FIREBASE_SERVICE_ACCOUNT` do ambiente do Claude Code (não cole no chat).
+8. Com a variável no lugar: `node nuvem.js admin SEU-EMAIL` torna sua conta responsável pelo app. (Sem o Claude: crie no Firestore a coleção `admins` com um documento cujo ID é o UID da sua conta.)
+9. **Authentication → Configurações → Domínios autorizados**: confira que `brunodiasef.github.io` está na lista.
+
+O app é publicado no GitHub Pages a cada push na `main` (`.github/workflows/pages.yml`).
+
+## Rodar no computador (desenvolvimento)
 
 ```bash
 npm install
-npm start
+npm run simulador          # Firebase local (precisa de Java)
+npm run teste:regras       # em outro terminal: testa quem pode ver e mexer em quê
+python3 -m http.server 3124 -d public   # e abra http://localhost:3124/?simulador
 ```
 
-Abra http://localhost:3000. Sem chave, o app roda em **modo demonstração** (resultado de exemplo fixo).
+`npm run build` refaz `public/vendor/firebase.js` (o Firebase vai junto com o app, para funcionar sem sinal).
 
-## Ativar a IA de verdade
+## Próximo passo: análise automática pela IA
 
-1. Crie uma chave em https://console.anthropic.com (precisa cadastrar cartão; cada análise custa poucos centavos).
-2. Copie `.env.example` para `.env` e preencha `ANTHROPIC_API_KEY`.
-3. Para a fase de testes, defina também `CODIGO_ACESSO` (ex.: `cafe2026`) e passe o código só para os produtores do teste. Isso evita que estranhos usem e gerem custo.
-4. Reinicie com `npm start`.
-
-## Colocar no ar para os produtores
-
-O celular só instala o app e acessa a câmera em endereço **https**. Qualquer serviço que rode Node.js serve (Render, Railway, Fly.io etc.):
-comando de início `npm start`, e as variáveis do `.env` cadastradas no painel do serviço.
+Hoje quem faz o laudo é o Claude Code, quando o Bruno pede. Para a análise sair sozinha, um servidor com a chave da API da Anthropic precisa ler os pedidos novos e gravar o laudo (como o `nuvem.js laudo` faz). O `server.js` já tem a chamada à IA (`/api/diagnosticar`); falta ligá-lo ao Firebase.
 
 ## Antes de ampliar o teste
 
