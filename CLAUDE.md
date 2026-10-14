@@ -15,8 +15,11 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
    entre os ids do catálogo, `saudavel` ou `nao_identificado`.
    - Seja honesto: prefira confiança `baixa` ou `nao_identificado` a chutar. Um erro faz o produtor gastar à toa.
    - Atenção a confusões comuns: deficiência nutricional × doença; cercosporiose × ferrugem;
-     bicho-mineiro × queimadura de sol; cochonilha-da-roseta × fungos brancos.
+     bicho-mineiro × queimadura de sol; cochonilha-da-roseta × fungos brancos;
+     `broca` (fruto) × `broca_ramos` (ramo verde oco, com furinho).
    - Foto ruim (borrada, escura, longe): `foto_boa: false` e explique em `problema_da_foto` como refazer.
+   - Um id novo no catálogo só funciona no celular depois que o app atualizado for publicado (push na `main`).
+     Antes disso, o app do produtor recusa o laudo: use `nao_identificado` e explique em `o_que_vi`.
    - **Não escreva produto nem dose.** Os tratamentos o app tira de `pragas.json`.
 3. **Escreva o laudo** em `laudos/laudo-CODIGO.json`, em português simples (fala de produtor rural):
 

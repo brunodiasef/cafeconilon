@@ -17,7 +17,7 @@ Quando houver chave da API (`.env`), o app passa sozinho para o **modo automáti
 - **Servidor (`server.js`)**: recebe a foto e pergunta ao Claude (IA da Anthropic) qual é o problema. A chave da API fica só no servidor.
 - **Base de pragas (`public/dados/pragas.json`)**: sintomas e tratamentos escritos e revisáveis. **A IA só identifica o problema; os tratamentos vêm desta base**, não são inventados pela IA.
 
-Pragas e doenças cobertas: broca, bicho-mineiro, cochonilha-da-roseta, cochonilha-verde, ácaro-vermelho, ferrugem, cercosporiose, seca-de-ponteiros, falta de nutrientes e nematoides.
+Pragas e doenças cobertas: broca, broca-dos-ramos, bicho-mineiro, cochonilha-da-roseta, cochonilha-verde, ácaro-vermelho, ferrugem, cercosporiose, seca-de-ponteiros, falta de nutrientes e nematoides.
 
 ## Rodar no computador
 

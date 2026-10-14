@@ -71,7 +71,7 @@ async function fotoEscolhida(evento) {
   if (!arquivos.length) return;
   try {
     if (!adicionando || !rascunho) {
-      rascunho = { fotos: [], parte: "Folha", talhao: lerLocal("ultimo-talhao") || "", obs: "" };
+      rascunho = { fotos: [], parte: "", talhao: lerLocal("ultimo-talhao") || "", obs: "" };
     } else {
       guardarCamposDoRascunho();
     }
@@ -261,6 +261,7 @@ const telas = {
         <li>Foto <b>na sombra</b> ou com o sol atrás de você. Evite contraluz.</li>
         <li>Folha: fotografe <b>por cima e por baixo</b> (a ferrugem fica embaixo).</li>
         <li>Fruto: mostre a <b>ponta (coroa)</b> do fruto.</li>
+        <li>Ramo secando: mostre o <b>furinho</b> e, se puder, o ramo aberto ao meio.</li>
         <li>Espere a câmera focar antes de apertar.</li>
       </ul>`;
   },
@@ -281,7 +282,7 @@ const telas = {
         </div>
         <p class="suave">Mais fotos do mesmo problema ajudam: folha por cima e por baixo, o fruto, o pé inteiro. Até ${MAX_FOTOS} fotos.</p>`
         : `<p class="suave">Limite de ${MAX_FOTOS} fotos neste pedido.</p>`}
-      <label>Qual parte da planta?</label>
+      <label>Qual parte da planta? (toque em uma)</label>
       <div class="opcoes" role="group">
         ${PARTES.map((p) => `<button data-parte="${p}" aria-pressed="${p === rascunho.parte}">${p}</button>`).join("")}
       </div>
@@ -503,6 +504,7 @@ document.addEventListener("click", async (e) => {
     case "galeria": return document.getElementById("galeria").click();
 
     case "analisar": {
+      if (!rascunho.parte) return mostrarErro("Escolha qual parte da planta aparece na foto.");
       rascunho.talhao = document.getElementById("talhao").value.trim();
       rascunho.obs = document.getElementById("obs").value.trim();
       gravarLocal("ultimo-talhao", rascunho.talhao);
@@ -516,6 +518,7 @@ document.addEventListener("click", async (e) => {
     }
 
     case "enviar": {
+      if (!rascunho.parte) return mostrarErro("Escolha qual parte da planta aparece na foto.");
       rascunho.talhao = document.getElementById("talhao").value.trim();
       rascunho.obs = document.getElementById("obs").value.trim();
       gravarLocal("ultimo-talhao", rascunho.talhao);
