@@ -277,26 +277,48 @@ const telas = {
   inicio() {
     if (ehAdmin) return telas.painel();
     const lista = [...casos.values()];
+    const aguardando = lista.filter((c) => c.status !== "pronto").length;
+    const contar = lista.filter((c) => faseDoCaso(c)?.classe === "falta" && c.status === "pronto").length;
+    const primeiroNome = (perfil?.nome || "").trim().split(/\s+/)[0];
+    const cartao = (rota, icone, titulo, texto) =>
+      `<button class="card-inicio" data-ir="${rota}"><span aria-hidden="true">${icone}</span><b>${titulo}</b><small>${texto}</small></button>`;
+    return `
+      <h1>${primeiroNome ? `Olá, ${esc(primeiroNome)}!` : "Olá!"}</h1>
+      <p class="suave">O que você quer fazer hoje?</p>
+      <div class="cards-inicio">
+        ${cartao("foto", "📷", "Foto", "Mandar foto de um problema")}
+        ${cartao("historico", "📋", "Histórico", aguardando ? `${aguardando} aguardando laudo` : contar ? `${contar} para contar como foi` : "Seus laudos")}
+        ${cartao("guia", "📖", "Pragas", "Conheça as pragas e doenças")}
+        ${cartao("sobre", "ℹ️", "Ajuda", "Como funciona o app")}
+      </div>`;
+  },
+
+  foto() {
+    const lista = [...casos.values()];
     const subindo = lista.filter((c) => c.subindo).length;
     const aguardando = lista.filter((c) => c.status !== "pronto" && !c.subindo).length;
     const contar = lista.filter((c) => faseDoCaso(c)?.classe === "falta" && c.status === "pronto").length;
     return `
       <h1>Viu algo errado no café?</h1>
       <p class="suave">Tire uma foto bem de perto do problema. O Bruno analisa e o laudo aparece aqui no app.</p>
-      <button class="botao grande" data-acao="camera"><span aria-hidden="true">📷</span>Tirar foto</button>
-      <button class="botao secundario" data-acao="galeria">Escolher foto da galeria</button>
+      <div class="dupla">
+        <button class="botao secundario" data-acao="camera"><span aria-hidden="true">📷</span>Tirar foto</button>
+        <button class="botao secundario" data-acao="galeria"><span aria-hidden="true">🖼️</span>Da galeria</button>
+      </div>
       ${subindo ? `<div class="aviso">📶 ${subindo} pedido(s) guardado(s) no celular. Vão sozinhos quando tiver sinal.</div>` : ""}
       ${aguardando ? `<div class="aviso">⏳ ${aguardando} pedido(s) aguardando análise. O laudo aparece no <b>Histórico</b>.</div>` : ""}
       ${contar ? `<button class="atalho-acomp" data-ir="historico">✍️ ${contar} caso(s) esperando você contar como foi na lavoura</button>` : ""}
-      <h2>Dicas para uma boa foto</h2>
-      <ul class="lista">
-        <li>Chegue <b>perto</b>: o problema deve ocupar a foto.</li>
-        <li>Foto <b>na sombra</b> ou com o sol atrás de você. Evite contraluz.</li>
-        <li>Folha: fotografe <b>por cima e por baixo</b> (a ferrugem fica embaixo).</li>
-        <li>Fruto: mostre a <b>ponta (coroa)</b> do fruto.</li>
-        <li>Ramo secando: mostre o <b>furinho</b> e, se puder, o ramo aberto ao meio.</li>
-        <li>Espere a câmera focar antes de apertar.</li>
-      </ul>`;
+      <details class="dicas">
+        <summary>💡 Dicas para uma boa foto</summary>
+        <ul class="lista">
+          <li>Chegue <b>perto</b>: o problema deve ocupar a foto.</li>
+          <li>Foto <b>na sombra</b> ou com o sol atrás de você. Evite contraluz.</li>
+          <li>Folha: fotografe <b>por cima e por baixo</b> (a ferrugem fica embaixo).</li>
+          <li>Fruto: mostre a <b>ponta (coroa)</b> do fruto.</li>
+          <li>Ramo secando: mostre o <b>furinho</b> e, se puder, o ramo aberto ao meio.</li>
+          <li>Espere a câmera focar antes de apertar.</li>
+        </ul>
+      </details>`;
   },
 
   confirmar() {
@@ -623,11 +645,11 @@ function mostrarErro(msg, classe = "erro") {
 }
 const mostrarAviso = (msg) => mostrarErro(msg, "");
 
-const ABAS_PRODUTOR = [["inicio", "📷", "Foto"], ["historico", "📋", "Histórico"], ["guia", "📖", "Pragas"], ["sobre", "ℹ️", "Ajuda"]];
+const ABAS_PRODUTOR = [["inicio", "🏠", "Início"], ["foto", "📷", "Foto"], ["historico", "📋", "Histórico"], ["guia", "📖", "Pragas"], ["sobre", "ℹ️", "Ajuda"]];
 const ABAS_ADMIN = [["inicio", "📊", "Painel"], ["produtores", "👥", "Produtores"], ["guia", "📖", "Pragas"], ["sobre", "ℹ️", "Conta"]];
 // Rotas que só existem para um dos dois tipos de usuário.
 const SO_ADMIN = ["painel", "produtores", "produtor", "novo-produtor"];
-const SO_PRODUTOR = ["confirmar", "historico"];
+const SO_PRODUTOR = ["confirmar", "historico", "foto"];
 
 async function ir(rota, id, { manterRolagem } = {}) {
   if (!CONFIGURADO) rota = "semConfig";
@@ -652,10 +674,12 @@ async function ir(rota, id, { manterRolagem } = {}) {
     const aba = b.dataset.ir;
     const ativa = aba === rota || (rota === "praga" && aba === "guia")
       || (rota === "resultado" && aba === (ehAdmin ? "inicio" : "historico"))
-      || (["produtor", "novo-produtor"].includes(rota) && aba === "produtores");
+      || (["produtor", "novo-produtor"].includes(rota) && aba === "produtores")
+      || (rota === "confirmar" && aba === "foto");
     b.classList.toggle("ativo", ativa);
     if (ativa) indice = i;
   });
+  abas.style.setProperty("--n", lista.length);
   if (indice >= 0) abas.style.setProperty("--aba", indice);
   abas.classList.toggle("sem-aba", indice < 0);
   tela.innerHTML = await telas[rota](id);
