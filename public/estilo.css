@@ -47,11 +47,24 @@ main { max-width: 560px; margin: 0 auto; padding: 16px; }
   padding-bottom: env(safe-area-inset-bottom);
 }
 .abas button {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: none; border: 0; padding: 10px 0 12px; font-size: 14px; color: var(--texto-suave);
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: 0; padding: 8px 0 10px; font-size: 14px; color: var(--texto-suave);
+  -webkit-tap-highlight-color: transparent;
 }
-.abas button span { font-size: 22px; line-height: 1; }
+.abas button span { font-size: 22px; line-height: 32px; transition: transform .3s; }
 .abas button.ativo { color: var(--verde); font-weight: 700; }
+.abas button.ativo span { transform: scale(1.12); }
+/* Bolinha que desliza até a aba escolhida (como no WhatsApp) */
+.abas .bolinha {
+  position: absolute; top: 8px; left: 0; width: 25%; height: 32px;
+  display: flex; justify-content: center; pointer-events: none;
+  transform: translateX(calc(var(--aba, 0) * 100%));
+  transition: transform .35s cubic-bezier(.3, 1.3, .5, 1), opacity .2s;
+}
+.abas .bolinha::before { content: ""; width: 64px; border-radius: 16px; background: var(--verde-claro); }
+.abas.sem-aba .bolinha { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .abas .bolinha, .abas button span { transition: none; } }
 
 /* Blocos comuns */
 h1 { font-size: 26px; line-height: 1.2; margin: 4px 0 8px; }

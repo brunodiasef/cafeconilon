@@ -640,15 +640,24 @@ async function ir(rota, id, { manterRolagem } = {}) {
   document.body.classList.toggle("admin", ehAdmin);
   const abas = document.querySelector(".abas");
   abas.hidden = !usuario || (!ehAdmin && !perfil?.aceitou_termos_em);
-  abas.innerHTML = (ehAdmin ? ABAS_ADMIN : ABAS_PRODUTOR).map(([r, icone, nome]) =>
-    `<button data-ir="${r}"><span aria-hidden="true">${icone}</span>${nome}</button>`).join("");
-  abas.querySelectorAll("button").forEach((b) => {
+  // Os botões só são refeitos quando muda o tipo de usuário, para a bolinha deslizar entre as abas.
+  const lista = ehAdmin ? ABAS_ADMIN : ABAS_PRODUTOR;
+  if (abas.dataset.tipo !== String(ehAdmin)) {
+    abas.dataset.tipo = String(ehAdmin);
+    abas.innerHTML = `<span class="bolinha" aria-hidden="true"></span>` + lista.map(([r, icone, nome]) =>
+      `<button data-ir="${r}"><span aria-hidden="true">${icone}</span>${nome}</button>`).join("");
+  }
+  let indice = -1;
+  abas.querySelectorAll("button").forEach((b, i) => {
     const aba = b.dataset.ir;
     const ativa = aba === rota || (rota === "praga" && aba === "guia")
       || (rota === "resultado" && aba === (ehAdmin ? "inicio" : "historico"))
       || (["produtor", "novo-produtor"].includes(rota) && aba === "produtores");
     b.classList.toggle("ativo", ativa);
+    if (ativa) indice = i;
   });
+  if (indice >= 0) abas.style.setProperty("--aba", indice);
+  abas.classList.toggle("sem-aba", indice < 0);
   tela.innerHTML = await telas[rota](id);
   window.scrollTo(0, manterRolagem ?? 0);
   const destino = rota === "inicio" ? "#" : `#${rota}${id ? "/" + id : ""}`;
