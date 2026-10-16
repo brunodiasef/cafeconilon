@@ -39,20 +39,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 main { max-width: 560px; margin: 0 auto; padding: 16px; }
 
-/* Abas: cápsula flutuante e meio transparente, como no Instagram */
+/* Abas: cápsula flutuante e bem transparente, como no Instagram */
 .abas {
   position: fixed; z-index: 5;
   left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
   max-width: 520px; margin: 0 auto; padding: 6px;
   display: grid; grid-template-columns: repeat(4, 1fr);
   border-radius: 999px;
-  background: rgba(255, 255, 255, .72);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .15);
+  -webkit-backdrop-filter: blur(6px) saturate(1.8); backdrop-filter: blur(6px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, .5);
   box-shadow: 0 8px 28px rgba(34, 32, 28, .18), 0 0 0 .5px rgba(34, 32, 28, .08);
 }
 .abas[hidden] { display: none; }
 .abas button {
+  text-shadow: 0 0 3px rgba(255, 255, 255, .9);
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   background: none; border: 0; padding: 6px 0 7px; font-size: 13px; color: var(--texto-suave);
@@ -70,7 +71,7 @@ main { max-width: 560px; margin: 0 auto; padding: 16px; }
 }
 .abas .bolinha::before { content: ""; position: absolute; inset: 0; border-radius: 999px; background: rgba(31, 94, 46, .13); }
 .abas.sem-aba .bolinha { opacity: 0; }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .abas { background: rgba(255, 255, 255, .95); } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .abas { background: rgba(255, 255, 255, .9); } }
 @media (prefers-reduced-motion: reduce) { .abas .bolinha, .abas button span { transition: none; } }
 
 /* Blocos comuns */
