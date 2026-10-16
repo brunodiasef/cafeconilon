@@ -3,3 +3,4 @@ node_modules/
 # Dados dos produtores: ficam só no computador, nunca no repositório público
 fotos-recebidas/
 laudos/*.json
+*-debug.log

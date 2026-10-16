@@ -1,7 +1,7 @@
 // Guarda o app no celular para abrir sem internet.
 // Rede primeiro (para receber atualizações); sem rede, usa a cópia guardada.
-const CACHE = "conilon-vivo-v6";
-const ARQUIVOS = ["./", "index.html", "app.js", "estilo.css", "icone.svg", "icone-192.png", "manifest.webmanifest", "dados/pragas.json"];
+const CACHE = "conilon-vivo-v8";
+const ARQUIVOS = ["./", "index.html", "app.js", "estilo.css", "icone.svg", "icone-192.png", "manifest.webmanifest", "dados/pragas.json", "firebase-config.js", "vendor/firebase.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));

@@ -22,16 +22,11 @@
 
   <main id="tela"></main>
 
-  <nav class="abas" aria-label="Menu">
-    <button data-ir="inicio"><span aria-hidden="true">📷</span>Foto</button>
-    <button data-ir="historico"><span aria-hidden="true">📋</span>Histórico</button>
-    <button data-ir="guia"><span aria-hidden="true">📖</span>Pragas</button>
-    <button data-ir="sobre"><span aria-hidden="true">ℹ️</span>Ajuda</button>
-  </nav>
+  <nav class="abas" aria-label="Menu" hidden></nav>
 
   <input id="camera" type="file" accept="image/*" capture="environment" hidden>
   <input id="galeria" type="file" accept="image/*" multiple hidden>
-  <input id="laudo" type="file" accept=".json,application/json,text/plain" multiple hidden>
+  <input id="laudo" type="file" accept=".json,application/json,text/plain" hidden>
 
   <script type="module" src="app.js"></script>
 </body>

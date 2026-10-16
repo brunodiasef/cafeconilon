@@ -1,16 +1,31 @@
 # Conilon Vivo — instruções para o Claude
 
-App web para pequenos produtores de café conilon do ES (ver README.md). Hoje roda no **modo manual**:
-o produtor envia a foto pelo WhatsApp ao Bruno, o Bruno passa a foto aqui, o Claude analisa e gera
-um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor importa no app.
+App web para pequenos produtores de café conilon do ES (ver README.md). Cada produtor entra com
+telefone e senha; o Bruno é o responsável (admin) e vê tudo. Os dados ficam no Firebase (Firestore).
+O produtor manda as fotos pelo app, o Claude analisa, grava o laudo no banco e o produtor vê na hora.
 
-## Quando o Bruno mandar uma foto para análise
+## Quando o Bruno pedir "analise os pedidos novos"
 
-1. **Leia o código** carimbado na faixa verde embaixo da foto (`CÓDIGO: XXXXXX`, 6 caracteres, sem O/0/I/1).
-   A faixa também traz parte da planta, talhão e data. Um pedido pode ter **até 4 fotos** com o mesmo código
-   (`FOTO 1 DE 3`...): analise todas juntas e faça **um laudo só** para o código. Se faltar alguma foto
-   do pedido, avise o Bruno. Se o Bruno colar a mensagem do WhatsApp,
-   ela tem o código e a observação do produtor. Sem código legível: pergunte ao Bruno, não invente.
+1. `node nuvem.js pendentes`: lista os pedidos sem laudo (produtor, parte, talhão, observação) e baixa
+   as fotos em `fotos-recebidas/CODIGO.jpg` (ou `CODIGO-1.jpg`, `CODIGO-2.jpg`...). Olhe todas as fotos do pedido.
+2. Faça o laudo de cada pedido como descrito abaixo (passos 2 a 4).
+3. `node nuvem.js laudo laudos/laudo-CODIGO.json`: grava no app. O produtor vê na hora, não precisa mandar arquivo.
+4. Diga ao Bruno, por pedido: produtor, diagnóstico e certeza. Se a certeza for baixa ou houver risco
+   de prejuízo, recomende o Incaper (gratuito).
+
+`node nuvem.js casos` mostra todos os casos e o que cada produtor contou ("achou", "resolveu").
+`node nuvem.js testar` confere se a chave funciona (primeira coisa a rodar numa sessão nova).
+Produtor esqueceu a senha: `node nuvem.js senha TELEFONE` e passe a senha nova ao Bruno.
+O acesso ao banco vem da variável `FIREBASE_SERVICE_ACCOUNT`. Sem ela, diga ao Bruno; não tente outro caminho.
+
+Se o Bruno mandar a foto direto aqui (fora do app), o caminho de antes continua valendo: faça o laudo e
+entregue o arquivo; ele importa no pedido pela área dele no app.
+
+## Como fazer o laudo
+
+1. **Código do pedido**: vem do `node nuvem.js pendentes`. Um pedido pode ter **até 4 fotos**:
+   analise todas juntas e faça **um laudo só** para o código. Fotos antigas, mandadas pelo WhatsApp,
+   têm o código carimbado na faixa verde (`CÓDIGO: XXXXXX`). Sem código: pergunte ao Bruno, não invente.
 2. **Analise a foto** comparando com o catálogo em `public/dados/pragas.json`. Escolha `diagnostico_id`
    entre os ids do catálogo, `saudavel` ou `nao_identificado`.
    - Seja honesto: prefira confiança `baixa` ou `nao_identificado` a chutar. Um erro faz o produtor gastar à toa.
@@ -18,8 +33,8 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
      bicho-mineiro × queimadura de sol; cochonilha-da-roseta × fungos brancos;
      `broca` (fruto) × `broca_ramos` (ramo verde oco, com furinho).
    - Foto ruim (borrada, escura, longe): `foto_boa: false` e explique em `problema_da_foto` como refazer.
-   - Um id novo no catálogo só funciona no celular depois que o app atualizado for publicado (push na `main`).
-     Antes disso, o app do produtor recusa o laudo: use `nao_identificado` e explique em `o_que_vi`.
+   - Um id novo no catálogo só aparece certo no celular depois que o app atualizado for publicado (push na `main`).
+     Antes disso, use `nao_identificado` e explique em `o_que_vi`.
    - **Não escreva produto nem dose.** Os tratamentos o app tira de `pragas.json`.
 3. **Escreva o laudo** em `laudos/laudo-CODIGO.json`, em português simples (fala de produtor rural):
 
@@ -49,9 +64,15 @@ um laudo `laudos/laudo-CODIGO.json`, o Bruno devolve o arquivo e o produtor impo
 ```
 
    Valores aceitos: `confianca` = alta | media | baixa; `gravidade` = leve | moderada | grave | nao_se_aplica.
-   `parte`, `talhao`, `data_foto` e `mensagem` são opcionais (servem se a foto não estiver no celular que importar).
-4. **Valide**: `node validar-laudo.js laudos/laudo-CODIGO.json`. Só entregue se der `OK`.
-5. Diga ao Bruno, em poucas linhas: o diagnóstico, a certeza, e o caminho do arquivo para ele mandar ao produtor.
-   Se a certeza for baixa ou houver risco de prejuízo, recomende a visita de um técnico (Incaper, gratuito).
+   `parte`, `talhao`, `data_foto` e `mensagem` são opcionais.
+4. **Valide**: `node validar-laudo.js laudos/laudo-CODIGO.json`. Só grave ou entregue se der `OK`.
 
-Guarde as fotos recebidas em `fotos-recebidas/` (fora do git) com o nome `CODIGO.jpg` (ou `CODIGO-1.jpg`, `CODIGO-2.jpg`... quando o pedido tiver várias fotos).
+As fotos e os dados dos produtores são pessoais: ficam fora do git (`fotos-recebidas/`, `laudos/*.json`)
+e nunca são publicados.
+
+## Desenvolvimento
+
+- `npm run build` gera `public/vendor/firebase.js` (rode depois de mudar `src/firebase.js` ou a versão do Firebase).
+- `npm run simulador` sobe o Firebase local; com ele rodando, `npm run teste:regras` testa as regras de acesso
+  (`firestore.rules`) e o app abre em `http://localhost:PORTA/?simulador`. `node nuvem.js ... --simulador` usa o simulador.
+- Mudou `firestore.rules`? Rode o teste e lembre o Bruno de publicar as regras (README).

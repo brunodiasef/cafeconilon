@@ -4,16 +4,25 @@
   "description": "App para identificar pragas do café conilon por foto e indicar o tratamento mais barato",
   "main": "server.js",
   "scripts": {
-    "start": "node --env-file-if-exists=.env server.js"
+    "start": "node --env-file-if-exists=.env server.js",
+    "build": "esbuild src/firebase.js --bundle --format=esm --minify --legal-comments=none --outfile=public/vendor/firebase.js",
+    "simulador": "firebase emulators:start --only auth,firestore --project demo-conilon",
+    "teste:regras": "node --test testes/regras.test.mjs"
   },
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^14.4.0",
     "zod": "^4.6.7"
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "firebase-tools": "^15.32.1"
   }
 }
